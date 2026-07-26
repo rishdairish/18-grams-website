@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>18 Grams — Fresh Coffee. Incredible Brunch.</title>
+<meta name="description" content="18 Grams café — specialty coffee and all-day brunch at Westfield Eastgardens, Sydney." />
+<script src="https://cdn.tailwindcss.com"></script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "lucide-react": "https://esm.sh/lucide-react@0.383.0?external=react"
+  }
+}
+</script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+<style>
+  html, body, #root { height: 100%; margin: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-type="module" data-presets="react">
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { createRoot } from "react-dom/client";
+import {
+  Menu as MenuIcon, X, Star, Heart, MapPin, Phone, Mail, Clock,
+  Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight,
+  Instagram, Facebook, Coffee, Check, Trash2, Pencil, Send, ArrowUp
+} from "lucide-react";
+
+
+/* ---------------------------------- THEME ----------------------------------
+Palette
+  --cream        #FAF3E8  page background
+  --cream-deep   #F0E3CC  card / section surfaces
+  --charcoal     #2A241E  primary text
+  --charcoal-70  rgba(42,36,30,.7)
+  --sage         #8A9A78  accent, links, active states
+  --sage-deep    #5C6B4C  sage hover / dark accent
+  --coffee       #6B4226  primary buttons
+  --coffee-deep  #4A2C18  button hover
+Type
+  Playfair Display  — headings, characterful, restrained to titles only
+  Inter             — everything else
+Signature element
+  The "18g dial" — 18 Grams takes its name from the classic 18-gram double
+  espresso dose. A hand-drawn dosing-scale dial appears as a badge in the
+  hero and doubles as a whimsical scroll-position readout in the corner of
+  the screen once you scroll past the hero — the only ornamental flourish
+  on an otherwise quiet, disciplined page.
+------------------------------------------------------------------------- */
+
+const COLORS = {
+  cream: "#FAF3E8",
+  creamDeep: "#F0E3CC",
+  charcoal: "#2A241E",
+  sage: "#8A9A78",
+  sageDeep: "#5C6B4C",
+  coffee: "#6B4226",
+  coffeeDeep: "#4A2C18",
+};
+
+const DARK = {
+  cream: "#211B16",
+  creamDeep: "#2B241D",
+  charcoal: "#F0E6D6",
+  sage: "#9DAE8C",
+  sageDeep: "#C7D3B8",
+  coffee: "#C9A27C",
+  coffeeDeep: "#E4C9A6",
+};
+
+const NAV_LINKS = [
+  { id: "home", label: "Home" },
+  { id: "menu", label: "Menu" },
+  { id: "about", label: "About" },
+  { id: "gallery", label: "Gallery" },
+  { id: "reviews", label: "Reviews" },
+  { id: "reservations", label: "Reservations" },
+  { id: "contact", label: "Contact" },
+];
+
+const MENU_CATEGORIES = ["Breakfast", "Lunch", "Coffee", "Drinks", "Desserts"];
+
+const IMG = {
+  latte: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80",
+  cafeInterior: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=1600&q=80",
+  avo: "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=600&q=80",
+  benedict: "https://images.unsplash.com/photo-1608039829572-78524f79c4c7?w=600&q=80",
+  frenchToast: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=600&q=80",
+  bigBreakfast: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&q=80",
+  omelette: "https://images.unsplash.com/photo-1594007654729-407eedc4be65?w=600&q=80",
+  burger: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=600&q=80",
+  halloumi: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=600&q=80",
+  schnitzel: "https://images.unsplash.com/photo-1599921841143-819065a55cc6?w=600&q=80",
+  steakSando: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=600&q=80",
+  caesar: "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=600&q=80",
+  flatWhite: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&q=80",
+  cappuccino: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=600&q=80",
+  latteCup: "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=600&q=80",
+  mocha: "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=600&q=80",
+  espresso: "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=600&q=80",
+  juice: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=600&q=80",
+  smoothie: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?w=600&q=80",
+  icedCoffee: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&q=80",
+  milkshake: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80",
+  pancakes: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&q=80",
+  bananaBread: "https://images.unsplash.com/photo-1606101273945-e9b0492cf2ef?w=600&q=80",
+  cake: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80",
+  muffin: "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=600&q=80",
+  gallery1: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80",
+  gallery2: "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800&q=80",
+  gallery3: "https://images.unsplash.com/photo-1534040385115-33dcb3acba5b?w=800&q=80",
+  gallery4: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&q=80",
+  gallery5: "https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?w=800&q=80",
+  gallery6: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80",
+  gallery7: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=800&q=80",
+  gallery8: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=800&q=80",
+  gallery9: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=800&q=80",
+};
+
+const MENU_ITEMS = [
+  { id: "b1", cat: "Breakfast", name: "Big Breakfast", desc: "Bacon, eggs your way, grilled tomato, mushroom, sourdough, hash brown.", price: 17.9, cal: 780, diet: [], img: IMG.bigBreakfast },
+  { id: "b2", cat: "Breakfast", name: "French Toast", desc: "Brioche, mascarpone, seasonal fruit, maple syrup.", price: 16.9, cal: 640, diet: ["V"], img: IMG.frenchToast },
+  { id: "b3", cat: "Breakfast", name: "Eggs Benedict", desc: "Poached eggs, leg ham, hollandaise, toasted muffin.", price: 17.9, cal: 590, diet: [], img: IMG.benedict },
+  { id: "b4", cat: "Breakfast", name: "Smashed Avocado", desc: "Sourdough, whipped feta, chilli, lemon, radish, dukkah.", price: 16.9, cal: 460, diet: ["V", "VG", "GF"], img: IMG.avo },
+  { id: "b5", cat: "Breakfast", name: "Omelette", desc: "Three eggs, spinach, mushroom, cheddar, toast.", price: 15.9, cal: 510, diet: ["V", "GF"], img: IMG.omelette },
+  { id: "l1", cat: "Lunch", name: "Grilled Chicken Burger", desc: "Free-range chicken, slaw, aioli, brioche bun, fries.", price: 17.9, cal: 890, diet: [], img: IMG.burger },
+  { id: "l2", cat: "Lunch", name: "Halloumi Burger", desc: "Grilled halloumi, roast pumpkin, rocket, beetroot relish.", price: 17.9, cal: 720, diet: ["V"], img: IMG.halloumi },
+  { id: "l3", cat: "Lunch", name: "Chicken Schnitzel", desc: "Panko crumbed chicken, garden salad, fries, lemon.", price: 18.9, cal: 950, diet: [], img: IMG.schnitzel },
+  { id: "l4", cat: "Lunch", name: "Steak Sandwich", desc: "Scotch fillet, caramelised onion, cheddar, mustard mayo.", price: 18.9, cal: 870, diet: [], img: IMG.steakSando },
+  { id: "l5", cat: "Lunch", name: "Caesar Salad", desc: "Cos lettuce, parmesan, bacon, croutons, soft egg.", price: 17.9, cal: 520, diet: ["GF"], img: IMG.caesar },
+  { id: "c1", cat: "Coffee", name: "Flat White", desc: "Double ristretto, velvet steamed milk.", price: 4.8, cal: 120, diet: ["V", "GF"], img: IMG.flatWhite },
+  { id: "c2", cat: "Coffee", name: "Cappuccino", desc: "Espresso, steamed milk, thick foam, cocoa dust.", price: 4.8, cal: 130, diet: ["V", "GF"], img: IMG.cappuccino },
+  { id: "c3", cat: "Coffee", name: "Latte", desc: "Espresso, silky steamed milk, light foam.", price: 4.9, cal: 150, diet: ["V", "GF"], img: IMG.latteCup },
+  { id: "c4", cat: "Coffee", name: "Mocha", desc: "Espresso, house chocolate, steamed milk.", price: 5.3, cal: 210, diet: ["V", "GF"], img: IMG.mocha },
+  { id: "c5", cat: "Coffee", name: "Espresso", desc: "Our signature 18g double shot.", price: 3.9, cal: 5, diet: ["V", "VG", "GF"], img: IMG.espresso },
+  { id: "d1", cat: "Drinks", name: "Fresh Juice", desc: "Orange, apple or watermelon, cold pressed daily.", price: 7.5, cal: 140, diet: ["V", "VG", "GF"], img: IMG.juice },
+  { id: "d2", cat: "Drinks", name: "Smoothie", desc: "Banana, berry or mango, yoghurt, honey.", price: 9, cal: 260, diet: ["V", "GF"], img: IMG.smoothie },
+  { id: "d3", cat: "Drinks", name: "Iced Coffee", desc: "Espresso, milk, vanilla ice cream, over ice.", price: 6.5, cal: 220, diet: ["V", "GF"], img: IMG.icedCoffee },
+  { id: "d4", cat: "Drinks", name: "Milkshake", desc: "Chocolate, vanilla or caramel, whipped cream.", price: 8, cal: 380, diet: ["V", "GF"], img: IMG.milkshake },
+  { id: "e1", cat: "Desserts", name: "Pancakes", desc: "Stack of three, berry compote, mascarpone, syrup.", price: 15.9, cal: 610, diet: ["V"], img: IMG.pancakes },
+  { id: "e2", cat: "Desserts", name: "Banana Bread", desc: "House-baked, whipped butter, toasted walnuts.", price: 8.9, cal: 340, diet: ["V"], img: IMG.bananaBread },
+  { id: "e3", cat: "Desserts", name: "Cake of the Day", desc: "Ask your barista what's fresh from the cabinet.", price: 7.9, cal: 420, diet: ["V"], img: IMG.cake },
+  { id: "e4", cat: "Desserts", name: "Muffin", desc: "Blueberry or double chocolate, baked daily.", price: 5.9, cal: 380, diet: ["V"], img: IMG.muffin },
+];
+
+const GALLERY_IMAGES = [
+  { src: IMG.gallery1, alt: "Latte art in a white cup", h: 280 },
+  { src: IMG.gallery2, alt: "Coffee beans close up", h: 340 },
+  { src: IMG.gallery3, alt: "Brunch plate flat lay", h: 220 },
+  { src: IMG.gallery4, alt: "Cafe interior seating", h: 360 },
+  { src: IMG.gallery5, alt: "Iced drink on marble table", h: 260 },
+  { src: IMG.gallery6, alt: "Pastry cabinet", h: 300 },
+  { src: IMG.gallery7, alt: "Barista pouring milk", h: 240 },
+  { src: IMG.gallery8, alt: "Table setting with sunlight", h: 320 },
+  { src: IMG.gallery9, alt: "Cafe storefront", h: 280 },
+];
+
+const INITIAL_REVIEWS = [
+  { id: "r1", name: "Priya M.", rating: 5, text: "Our go-to Eastgardens brunch spot. The smashed avo is generous and the flat whites never miss.", date: "2026-06-14", likes: 12 },
+  { id: "r2", name: "Daniel K.", rating: 5, text: "Friendly staff, quick table turnaround even on a busy Saturday. The halloumi burger is a favourite.", date: "2026-06-02", likes: 9 },
+  { id: "r3", name: "Aroha T.", rating: 4, text: "Lovely relaxed spot inside the centre. Coffee is consistently good, can get loud at peak lunch.", date: "2026-05-21", likes: 5 },
+  { id: "r4", name: "Marcus L.", rating: 5, text: "Portions are huge for the price and the eggs benny is done properly. Will be back.", date: "2026-05-09", likes: 7 },
+  { id: "r5", name: "Grace W.", rating: 4, text: "Great all-day breakfast menu and easy to find parking nearby. Staff remembered our order from last time.", date: "2026-04-28", likes: 3 },
+];
+
+const FAQS = [
+  { q: "Do you take walk-ins?", a: "Yes — walk-ins are always welcome. For groups of 6 or more, or peak weekend brunch times, we recommend booking ahead." },
+  { q: "Is there parking near the café?", a: "18 Grams sits inside Westfield Eastgardens, so all centre parking applies, including the first hours free for shoppers." },
+  { q: "Can you cater for dietary requirements?", a: "Most of our menu can be made vegetarian, vegan or gluten free — look for the badges on each item, and just ask your server for swaps." },
+  { q: "What are your busiest times?", a: "Weekend mornings between 9am and midday are our busiest — weekday mornings and afternoons are quieter if you prefer a relaxed sitting." },
+];
+
+/* -------------------------------- HELPERS -------------------------------- */
+
+function useScrollProgress() {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const h = document.documentElement;
+      const scrollTop = h.scrollTop || document.body.scrollTop;
+      const scrollHeight = (h.scrollHeight || document.body.scrollHeight) - h.clientHeight;
+      setProgress(scrollHeight > 0 ? Math.min(1, scrollTop / scrollHeight) : 0);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return progress;
+}
+
+function DoseDial({ progress, size = 56, dark }) {
+  // "18g dial" signature element — a dosing-scale dial that reads scroll position
+  const c = dark ? DARK : COLORS;
+  const angle = -130 + progress * 260;
+  const ticks = Array.from({ length: 12 });
+  return (
+    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
+      <svg viewBox="0 0 100 100" width={size} height={size}>
+        <circle cx="50" cy="50" r="46" fill={c.creamDeep} stroke={c.coffee} strokeWidth="1.5" opacity="0.9" />
+        {ticks.map((_, i) => {
+          const a = (-130 + (i / 11) * 260) * (Math.PI / 180);
+          const x1 = 50 + 38 * Math.cos(a), y1 = 50 + 38 * Math.sin(a);
+          const x2 = 50 + 43 * Math.cos(a), y2 = 50 + 43 * Math.sin(a);
+          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={c.coffee} strokeWidth="1" opacity="0.6" />;
+        })}
+        <line
+          x1="50" y1="50"
+          x2={50 + 32 * Math.cos((angle * Math.PI) / 180)}
+          y2={50 + 32 * Math.sin((angle * Math.PI) / 180)}
+          stroke={c.sageDeep} strokeWidth="2.5" strokeLinecap="round"
+          style={{ transition: "all 120ms linear" }}
+        />
+        <circle cx="50" cy="50" r="4" fill={c.sageDeep} />
+        <text x="50" y="72" textAnchor="middle" fontSize="11" fill={c.charcoal} fontFamily="Playfair Display, serif" fontWeight="700">18g</text>
+      </svg>
+    </div>
+  );
+}
+
+function StarRow({ value, size = 16, onRate }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Star
+          key={n}
+          size={size}
+          className={onRate ? "cursor-pointer" : ""}
+          fill={n <= value ? "#C9973B" : "none"}
+          stroke={n <= value ? "#C9973B" : "#B8AA8E"}
+          onClick={onRate ? () => onRate(n) : undefined}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* --------------------------------- APP ------------------------------------ */
+
+export default function App() {
+  const [dark, setDark] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [cookieVisible, setCookieVisible] = useState(true);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  const [menuCategory, setMenuCategory] = useState("Breakfast");
+  const [menuSearch, setMenuSearch] = useState("");
+  const [dietFilters, setDietFilters] = useState([]);
+  const [favourites, setFavourites] = useState([]);
+
+  const [lightboxIndex, setLightboxIndex] = useState(null);
+
+  const [user, setUser] = useState(null);
+  const [signInName, setSignInName] = useState("");
+  const [reviews, setReviews] = useState(INITIAL_REVIEWS);
+  const [reviewSort, setReviewSort] = useState("Newest");
+  const [reviewDraft, setReviewDraft] = useState({ rating: 5, text: "" });
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [likedIds, setLikedIds] = useState([]);
+
+  const [resForm, setResForm] = useState({ name: "", email: "", phone: "", date: "", time: "", guests: "2", notes: "" });
+  const [resErrors, setResErrors] = useState({});
+  const [resSubmitted, setResSubmitted] = useState(false);
+
+  const [openFaq, setOpenFaq] = useState(null);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterDone, setNewsletterDone] = useState(false);
+
+  const progress = useScrollProgress();
+  const c = dark ? DARK : COLORS;
+
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap";
+    document.head.appendChild(link);
+    const t = setTimeout(() => setLoading(false), 1100);
+    return () => { clearTimeout(t); document.head.removeChild(link); };
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setShowBackToTop(window.scrollY > 600);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const scrollTo = (id) => {
+    setMobileNavOpen(false);
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const filteredMenu = useMemo(() => {
+    return MENU_ITEMS.filter((it) => {
+      if (it.cat !== menuCategory) return false;
+      if (menuSearch && !(`${it.name} ${it.desc}`.toLowerCase().includes(menuSearch.toLowerCase()))) return false;
+      if (dietFilters.length && !dietFilters.every((d) => it.diet.includes(d))) return false;
+      return true;
+    });
+  }, [menuCategory, menuSearch, dietFilters]);
+
+  const toggleDiet = (d) => setDietFilters((f) => (f.includes(d) ? f.filter((x) => x !== d) : [...f, d]));
+  const toggleFav = (id) => setFavourites((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
+
+  const avgRating = useMemo(() => (reviews.reduce((s, r) => s + r.rating, 0) / (reviews.length || 1)).toFixed(1), [reviews]);
+  const ratingBreakdown = useMemo(() => {
+    const counts = [0, 0, 0, 0, 0];
+    reviews.forEach((r) => counts[r.rating - 1]++);
+    return counts;
+  }, [reviews]);
+
+  const sortedReviews = useMemo(() => {
+    const arr = [...reviews];
+    if (reviewSort === "Most Helpful") arr.sort((a, b) => b.likes - a.likes);
+    else if (reviewSort === "Highest Rated") arr.sort((a, b) => b.rating - a.rating);
+    else arr.sort((a, b) => new Date(b.date) - new Date(a.date));
+    return arr;
+  }, [reviews, reviewSort]);
+
+  const submitReview = () => {
+    if (!user || !reviewDraft.text.trim()) return;
+    if (editingReviewId) {
+      setReviews((rs) => rs.map((r) => (r.id === editingReviewId ? { ...r, text: reviewDraft.text, rating: reviewDraft.rating } : r)));
+      setEditingReviewId(null);
+    } else {
+      setReviews((rs) => [{ id: "r" + Date.now(), name: user, rating: reviewDraft.rating, text: reviewDraft.text, date: new Date().toISOString().slice(0, 10), likes: 0 }, ...rs]);
+    }
+    setReviewDraft({ rating: 5, text: "" });
+  };
+
+  const startEditReview = (r) => { setEditingReviewId(r.id); setReviewDraft({ rating: r.rating, text: r.text }); };
+  const deleteReview = (id) => setReviews((rs) => rs.filter((r) => r.id !== id));
+  const toggleLike = (id) => {
+    const already = likedIds.includes(id);
+    setLikedIds((l) => (already ? l.filter((x) => x !== id) : [...l, id]));
+    setReviews((rs) => rs.map((r) => (r.id === id ? { ...r, likes: r.likes + (already ? -1 : 1) } : r)));
+  };
+
+  const validateReservation = () => {
+    const errs = {};
+    if (!resForm.name.trim()) errs.name = "Enter your name";
+    if (!/^\S+@\S+\.\S+$/.test(resForm.email)) errs.email = "Enter a valid email";
+    if (!/^[0-9+()\s-]{7,}$/.test(resForm.phone)) errs.phone = "Enter a valid phone number";
+    if (!resForm.date) errs.date = "Choose a date";
+    if (!resForm.time) errs.time = "Choose a time";
+    setResErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+  const submitReservation = () => {
+    if (validateReservation()) {
+      setResSubmitted(true);
+      setTimeout(() => setResSubmitted(false), 5000);
+      setResForm({ name: "", email: "", phone: "", date: "", time: "", guests: "2", notes: "" });
+    }
+  };
+
+  const headingFont = { fontFamily: "'Playfair Display', serif" };
+  const bodyFont = { fontFamily: "'Inter', sans-serif" };
+
+  return (
+    <div style={{ ...bodyFont, background: c.cream, color: c.charcoal, minHeight: "100%", transition: "background 300ms, color 300ms" }} className="w-full min-h-screen">
+      {/* Loading screen */}
+      {loading && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: c.cream }}>
+          <div className="flex flex-col items-center gap-3">
+            <Coffee size={34} style={{ color: c.coffee }} className="animate-bounce" />
+            <div style={{ ...headingFont, color: c.coffee }} className="text-lg tracking-wide">18 Grams</div>
+          </div>
+        </div>
+      )}
+
+      {/* Scroll progress bar */}
+      <div className="fixed top-0 left-0 w-full h-[3px] z-[70]" style={{ background: "transparent" }}>
+        <div style={{ width: `${progress * 100}%`, background: `linear-gradient(90deg, ${c.sage}, ${c.coffee})`, height: "100%", transition: "width 100ms linear" }} />
+      </div>
+
+      {/* Nav */}
+      <header className="fixed top-[3px] left-0 w-full z-[60] backdrop-blur" style={{ background: dark ? "rgba(33,27,22,0.85)" : "rgba(250,243,232,0.85)", borderBottom: `1px solid ${c.creamDeep}` }}>
+        <div className="max-w-6xl mx-auto px-5 flex items-center justify-between h-16">
+          <button onClick={() => scrollTo("home")} style={{ ...headingFont, color: c.coffee }} className="text-xl font-bold tracking-tight">
+            18 Grams
+          </button>
+          <nav className="hidden md:flex items-center gap-7">
+            {NAV_LINKS.map((l) => (
+              <button key={l.id} onClick={() => scrollTo(l.id)} style={{ color: c.charcoal }} className="text-sm font-medium opacity-80 hover:opacity-100 transition">
+                {l.label}
+              </button>
+            ))}
+          </nav>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setDark((d) => !d)} className="text-xs font-semibold px-3 py-1.5 rounded-full border" style={{ borderColor: c.coffee, color: c.coffee }}>
+              {dark ? "Light" : "Dark"}
+            </button>
+            {progress > 0.08 && <DoseDial progress={progress} size={40} dark={dark} />}
+            <button className="md:hidden" onClick={() => setMobileNavOpen((o) => !o)} style={{ color: c.charcoal }}>
+              {mobileNavOpen ? <X size={22} /> : <MenuIcon size={22} />}
+            </button>
+          </div>
+        </div>
+        {mobileNavOpen && (
+          <div className="md:hidden flex flex-col px-5 pb-4 gap-3" style={{ background: c.cream }}>
+            {NAV_LINKS.map((l) => (
+              <button key={l.id} onClick={() => scrollTo(l.id)} style={{ color: c.charcoal }} className="text-left text-sm font-medium py-1">
+                {l.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </header>
+
+      {/* HERO */}
+      <section id="home" className="relative h-[100svh] min-h-[560px] flex items-center justify-center overflow-hidden">
+        <img src={IMG.cafeInterior} alt="18 Grams café interior" className="absolute inset-0 w-full h-full object-cover" style={{ background: c.creamDeep }} />
+        <div className="absolute inset-0" style={{ background: dark ? "linear-gradient(180deg, rgba(20,16,12,.55), rgba(20,16,12,.8))" : "linear-gradient(180deg, rgba(42,36,30,.35), rgba(42,36,30,.6))" }} />
+        <div className="relative z-10 text-center px-6 max-w-2xl animate-[fadeUp_900ms_ease-out]">
+          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 text-xs font-semibold tracking-wide" style={{ background: "rgba(250,243,232,0.15)", color: "#FAF3E8", border: "1px solid rgba(250,243,232,0.4)" }}>
+            <DoseDial progress={0.62} size={26} dark={false} />
+            SINGLE ORIGIN · WESTFIELD EASTGARDENS
+          </div>
+          <h1 style={headingFont} className="text-4xl md:text-6xl font-bold text-white leading-tight mb-4">
+            Fresh Coffee. Incredible Brunch.
+          </h1>
+          <p className="text-white/90 text-base md:text-lg mb-8">Experience modern café dining at 18 Grams.</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button onClick={() => scrollTo("menu")} className="px-7 py-3 rounded-full font-semibold text-sm transition hover:-translate-y-0.5" style={{ background: c.coffee, color: "#FAF3E8" }}>
+              View Menu
+            </button>
+            <button onClick={() => scrollTo("reservations")} className="px-7 py-3 rounded-full font-semibold text-sm transition hover:-translate-y-0.5 border-2 border-white text-white">
+              Book a Table
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ABOUT */}
+      <section id="about" className="max-w-6xl mx-auto px-5 py-24">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <p className="text-xs font-semibold tracking-widest mb-3" style={{ color: c.sageDeep }}>OUR STORY</p>
+            <h2 style={headingFont} className="text-3xl md:text-4xl font-bold mb-5">A relaxed corner of Eastgardens, built around great coffee.</h2>
+            <p className="opacity-80 leading-relaxed mb-4">
+              Tucked inside Westfield Eastgardens, 18 Grams pours specialty coffee alongside an all-day brunch menu built for lingering — think smashed avocado, hearty burgers and fresh salads, served by a team that remembers your order.
+            </p>
+            <p className="opacity-80 leading-relaxed">
+              Our name comes from the classic 18-gram espresso dose — the exact measure our baristas pull every single shot to, morning after morning. It's a small ritual of care that runs through everything else we serve.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { label: "Rating", value: "4.7+", icon: <Star size={20} fill={c.coffee} stroke={c.coffee} /> },
+              { label: "Coffees served", value: "120k+", icon: <Coffee size={20} /> },
+              { label: "All-day breakfast", value: "7:30am–5pm", icon: <Clock size={20} /> },
+              { label: "Loved by locals", value: "Since day one", icon: <Heart size={20} fill={c.sage} stroke={c.sage} /> },
+            ].map((s) => (
+              <div key={s.label} className="rounded-2xl p-5 shadow-sm" style={{ background: c.creamDeep }}>
+                <div className="mb-2" style={{ color: c.coffee }}>{s.icon}</div>
+                <div style={headingFont} className="text-xl font-bold">{s.value}</div>
+                <div className="text-xs opacity-70">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* MENU */}
+      <section id="menu" className="py-24" style={{ background: c.creamDeep }}>
+        <div className="max-w-6xl mx-auto px-5">
+          <div className="text-center mb-10">
+            <p className="text-xs font-semibold tracking-widest mb-3" style={{ color: c.sageDeep }}>FEATURED MENU</p>
+            <h2 style={headingFont} className="text-3xl md:text-4xl font-bold">Something for every hour</h2>
+          </div>
+
+          <div className="flex flex-wrap gap-2 justify-center mb-6">
+            {MENU_CATEGORIES.map((cat) => (
+              <button key={cat} onClick={() => setMenuCategory(cat)}
+                className="px-4 py-2 rounded-full text-sm font-semibold transition"
+                style={menuCategory === cat ? { background: c.coffee, color: "#FAF3E8" } : { background: c.cream, color: c.charcoal }}>
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-between items-center mb-8">
+            <div className="relative w-full sm:w-72">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 opacity-50" />
+              <input value={menuSearch} onChange={(e) => setMenuSearch(e.target.value)} placeholder="Search food, drinks…"
+                className="w-full pl-9 pr-3 py-2 rounded-full text-sm outline-none" style={{ background: c.cream, border: `1px solid ${c.sage}` }} />
+            </div>
+            <div className="flex gap-2">
+              {["V", "VG", "GF"].map((d) => (
+                <button key={d} onClick={() => toggleDiet(d)}
+                  className="w-9 h-9 rounded-full text-xs font-bold border-2 transition"
+                  style={dietFilters.includes(d) ? { background: c.sage, borderColor: c.sage, color: "#fff" } : { borderColor: c.sage, color: c.sageDeep }}
+                  title={d === "V" ? "Vegetarian" : d === "VG" ? "Vegan" : "Gluten Free"}>
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredMenu.map((item) => (
+              <div key={item.id} className="rounded-2xl overflow-hidden shadow-sm group transition hover:-translate-y-1 hover:shadow-lg" style={{ background: c.cream }}>
+                <div className="relative h-44 overflow-hidden">
+                  <img src={item.img} alt={item.name} className="w-full h-full object-cover transition group-hover:scale-105" style={{ background: c.creamDeep }} />
+                  <button onClick={() => toggleFav(item.id)} className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(250,243,232,0.85)" }}>
+                    <Heart size={16} fill={favourites.includes(item.id) ? "#B4453A" : "none"} stroke={favourites.includes(item.id) ? "#B4453A" : c.charcoal} />
+                  </button>
+                </div>
+                <div className="p-5">
+                  <div className="flex justify-between items-start mb-1.5">
+                    <h3 style={headingFont} className="font-bold text-lg">{item.name}</h3>
+                    <span style={{ color: c.coffee }} className="font-semibold text-sm whitespace-nowrap ml-2">${item.price.toFixed(2)}</span>
+                  </div>
+                  <p className="text-sm opacity-70 mb-3">{item.desc}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs opacity-60">{item.cal} cal</span>
+                    <div className="flex gap-1">
+                      {item.diet.map((d) => (
+                        <span key={d} className="w-6 h-6 rounded-full text-[10px] font-bold flex items-center justify-center" style={{ background: c.sage, color: "#fff" }}>{d}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {filteredMenu.length === 0 && (
+              <p className="col-span-full text-center opacity-60 py-10">No dishes match your search or filters — try clearing one.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* GALLERY */}
+      <section id="gallery" className="max-w-6xl mx-auto px-5 py-24">
+        <div className="text-center mb-10">
+          <p className="text-xs font-semibold tracking-widest mb-3" style={{ color: c.sageDeep }}>GALLERY</p>
+          <h2 style={headingFont} className="text-3xl md:text-4xl font-bold">A taste of the space</h2>
+        </div>
+        <div className="columns-2 sm:columns-3 gap-4 [column-fill:_balance]">
+          {GALLERY_IMAGES.map((g, i) => (
+            <button key={i} onClick={() => setLightboxIndex(i)} className="mb-4 block w-full break-inside-avoid rounded-2xl overflow-hidden shadow-sm group">
+              <img src={g.src} alt={g.alt} style={{ height: g.h, background: c.creamDeep }} className="w-full object-cover transition duration-300 group-hover:scale-105" />
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {lightboxIndex !== null && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/85 px-6" onClick={() => setLightboxIndex(null)}>
+          <button className="absolute top-6 right-6 text-white" onClick={() => setLightboxIndex(null)}><X size={28} /></button>
+          <button className="absolute left-4 md:left-10 text-white" onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length); }}><ChevronLeft size={32} /></button>
+          <img src={GALLERY_IMAGES[lightboxIndex].src} alt={GALLERY_IMAGES[lightboxIndex].alt} className="max-h-[80vh] max-w-[85vw] rounded-xl object-contain" onClick={(e) => e.stopPropagation()} />
+          <button className="absolute right-4 md:right-10 text-white" onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i + 1) % GALLERY_IMAGES.length); }}><ChevronRight size={32} /></button>
+        </div>
+      )}
+
+      {/* REVIEWS */}
+      <section id="reviews" className="py-24" style={{ background: c.creamDeep }}>
+        <div className="max-w-4xl mx-auto px-5">
+          <div className="text-center mb-10">
+            <p className="text-xs font-semibold tracking-widest mb-3" style={{ color: c.sageDeep }}>REVIEWS</p>
+            <h2 style={headingFont} className="text-3xl md:text-4xl font-bold">What locals are saying</h2>
+          </div>
+
+          <div className="grid md:grid-cols-[auto,1fr] gap-8 items-center mb-10 rounded-2xl p-6" style={{ background: c.cream }}>
+            <div className="text-center md:border-r md:pr-8" style={{ borderColor: c.sage }}>
+              <div style={headingFont} className="text-5xl font-bold">{avgRating}</div>
+              <StarRow value={Math.round(avgRating)} />
+              <div className="text-xs opacity-60 mt-1">{reviews.length} reviews</div>
+            </div>
+            <div className="space-y-1.5">
+              {[5, 4, 3, 2, 1].map((star) => {
+                const count = ratingBreakdown[star - 1];
+                const pct = reviews.length ? (count / reviews.length) * 100 : 0;
+                return (
+                  <div key={star} className="flex items-center gap-2 text-xs">
+                    <span className="w-3">{star}</span>
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: c.creamDeep }}>
+                      <div style={{ width: `${pct}%`, background: c.sage, height: "100%" }} />
+                    </div>
+                    <span className="w-6 text-right opacity-60">{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
+            <div className="flex gap-2">
+              {["Newest", "Highest Rated", "Most Helpful"].map((s) => (
+                <button key={s} onClick={() => setReviewSort(s)} className="px-3 py-1.5 rounded-full text-xs font-semibold transition"
+                  style={reviewSort === s ? { background: c.coffee, color: "#fff" } : { background: c.cream, color: c.charcoal }}>
+                  {s}
+                </button>
+              ))}
+            </div>
+            {!user ? (
+              <div className="flex gap-2">
+                <input value={signInName} onChange={(e) => setSignInName(e.target.value)} placeholder="Your name" className="px-3 py-1.5 rounded-full text-sm outline-none" style={{ background: c.cream, border: `1px solid ${c.sage}` }} />
+                <button onClick={() => signInName.trim() && setUser(signInName.trim())} className="px-4 py-1.5 rounded-full text-xs font-semibold" style={{ background: c.sage, color: "#fff" }}>Sign in</button>
+              </div>
+            ) : (
+              <div className="text-xs opacity-70">Signed in as <strong>{user}</strong> · <button onClick={() => setUser(null)} className="underline">sign out</button></div>
+            )}
+          </div>
+
+          {user && (
+            <div className="rounded-2xl p-5 mb-8" style={{ background: c.cream }}>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-sm font-medium">Your rating</span>
+                <StarRow value={reviewDraft.rating} onRate={(n) => setReviewDraft((d) => ({ ...d, rating: n }))} />
+              </div>
+              <textarea value={reviewDraft.text} onChange={(e) => setReviewDraft((d) => ({ ...d, text: e.target.value }))} placeholder="Tell us about your visit…" rows={3}
+                className="w-full p-3 rounded-xl text-sm outline-none resize-none" style={{ background: c.creamDeep, border: `1px solid ${c.sage}` }} />
+              <div className="flex justify-end gap-2 mt-3">
+                {editingReviewId && <button onClick={() => { setEditingReviewId(null); setReviewDraft({ rating: 5, text: "" }); }} className="px-4 py-2 rounded-full text-xs font-semibold" style={{ color: c.charcoal }}>Cancel</button>}
+                <button onClick={submitReview} className="px-5 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5" style={{ background: c.coffee, color: "#fff" }}>
+                  <Send size={14} /> {editingReviewId ? "Save changes" : "Post review"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {sortedReviews.map((r) => (
+              <div key={r.id} className="rounded-2xl p-5" style={{ background: c.cream }}>
+                <div className="flex justify-between items-start mb-1">
+                  <div>
+                    <div className="font-semibold text-sm">{r.name}</div>
+                    <StarRow value={r.rating} size={13} />
+                  </div>
+                  <span className="text-xs opacity-50">{r.date}</span>
+                </div>
+                <p className="text-sm opacity-80 my-2">{r.text}</p>
+                <div className="flex items-center gap-4 text-xs">
+                  <button onClick={() => toggleLike(r.id)} className="flex items-center gap-1 opacity-70 hover:opacity-100">
+                    <Heart size={14} fill={likedIds.includes(r.id) ? "#B4453A" : "none"} stroke={likedIds.includes(r.id) ? "#B4453A" : c.charcoal} /> {r.likes}
+                  </button>
+                  {user === r.name && (
+                    <>
+                      <button onClick={() => startEditReview(r)} className="flex items-center gap-1 opacity-70 hover:opacity-100"><Pencil size={13} /> Edit</button>
+                      <button onClick={() => deleteReview(r.id)} className="flex items-center gap-1 opacity-70 hover:opacity-100"><Trash2 size={13} /> Delete</button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* RESERVATIONS */}
+      <section id="reservations" className="max-w-2xl mx-auto px-5 py-24">
+        <div className="text-center mb-10">
+          <p className="text-xs font-semibold tracking-widest mb-3" style={{ color: c.sageDeep }}>RESERVATIONS</p>
+          <h2 style={headingFont} className="text-3xl md:text-4xl font-bold">Book a table</h2>
+        </div>
+
+        {resSubmitted ? (
+          <div className="rounded-2xl p-10 text-center animate-[fadeUp_500ms_ease-out]" style={{ background: c.creamDeep }}>
+            <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: c.sage }}>
+              <Check size={28} color="#fff" />
+            </div>
+            <h3 style={headingFont} className="text-xl font-bold mb-2">Booking request received</h3>
+            <p className="opacity-70 text-sm">We'll confirm your table by email shortly. See you soon!</p>
+          </div>
+        ) : (
+          <div className="rounded-2xl p-6 md:p-8 grid gap-4" style={{ background: c.creamDeep }}>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <input value={resForm.name} onChange={(e) => setResForm((f) => ({ ...f, name: e.target.value }))} placeholder="Full name" className="w-full p-3 rounded-xl text-sm outline-none" style={{ background: c.cream, border: `1px solid ${resErrors.name ? "#B4453A" : c.sage}` }} />
+                {resErrors.name && <p className="text-xs mt-1" style={{ color: "#B4453A" }}>{resErrors.name}</p>}
+              </div>
+              <div>
+                <input value={resForm.email} onChange={(e) => setResForm((f) => ({ ...f, email: e.target.value }))} placeholder="Email" className="w-full p-3 rounded-xl text-sm outline-none" style={{ background: c.cream, border: `1px solid ${resErrors.email ? "#B4453A" : c.sage}` }} />
+                {resErrors.email && <p className="text-xs mt-1" style={{ color: "#B4453A" }}>{resErrors.email}</p>}
+              </div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <input value={resForm.phone} onChange={(e) => setResForm((f) => ({ ...f, phone: e.target.value }))} placeholder="Phone" className="w-full p-3 rounded-xl text-sm outline-none" style={{ background: c.cream, border: `1px solid ${resErrors.phone ? "#B4453A" : c.sage}` }} />
+                {resErrors.phone && <p className="text-xs mt-1" style={{ color: "#B4453A" }}>{resErrors.phone}</p>}
+              </div>
+              <div>
+                <select value={resForm.guests} onChange={(e) => setResForm((f) => ({ ...f, guests: e.target.value }))} className="w-full p-3 rounded-xl text-sm outline-none" style={{ background: c.cream, border: `1px solid ${c.sage}` }}>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <option key={n} value={n}>{n} guest{n > 1 ? "s" : ""}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <input type="date" value={resForm.date} onChange={(e) => setResForm((f) => ({ ...f, date: e.target.value }))} className="w-full p-3 rounded-xl text-sm outline-none" style={{ background: c.cream, border: `1px solid ${resErrors.date ? "#B4453A" : c.sage}` }} />
+                {resErrors.date && <p className="text-xs mt-1" style={{ color: "#B4453A" }}>{resErrors.date}</p>}
+              </div>
+              <div>
+                <input type="time" value={resForm.time} onChange={(e) => setResForm((f) => ({ ...f, time: e.target.value }))} className="w-full p-3 rounded-xl text-sm outline-none" style={{ background: c.cream, border: `1px solid ${resErrors.time ? "#B4453A" : c.sage}` }} />
+                {resErrors.time && <p className="text-xs mt-1" style={{ color: "#B4453A" }}>{resErrors.time}</p>}
+              </div>
+            </div>
+            <textarea value={resForm.notes} onChange={(e) => setResForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Notes (allergies, occasion, seating preference)" rows={3} className="w-full p-3 rounded-xl text-sm outline-none resize-none" style={{ background: c.cream, border: `1px solid ${c.sage}` }} />
+            <button onClick={submitReservation} className="w-full py-3 rounded-full font-semibold text-sm" style={{ background: c.coffee, color: "#fff" }}>Confirm booking</button>
+          </div>
+        )}
+      </section>
+
+      {/* FAQ */}
+      <section className="max-w-3xl mx-auto px-5 pb-24">
+        <div className="text-center mb-8">
+          <h2 style={headingFont} className="text-3xl font-bold">Frequently asked</h2>
+        </div>
+        <div className="space-y-3">
+          {FAQS.map((f, i) => (
+            <div key={i} className="rounded-xl overflow-hidden" style={{ background: c.creamDeep }}>
+              <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex justify-between items-center p-4 text-left font-medium text-sm">
+                {f.q}
+                {openFaq === i ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </button>
+              {openFaq === i && <p className="px-4 pb-4 text-sm opacity-75">{f.a}</p>}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CONTACT */}
+      <section id="contact" className="py-24" style={{ background: c.creamDeep }}>
+        <div className="max-w-6xl mx-auto px-5 grid md:grid-cols-2 gap-10">
+          <div>
+            <p className="text-xs font-semibold tracking-widest mb-3" style={{ color: c.sageDeep }}>CONTACT</p>
+            <h2 style={headingFont} className="text-3xl md:text-4xl font-bold mb-6">Come say hello</h2>
+            <div className="space-y-4 text-sm">
+              <div className="flex gap-3"><MapPin size={18} style={{ color: c.coffee }} className="shrink-0 mt-0.5" /><span>152 Bunnerong Road, Westfield Eastgardens, Sydney NSW 2036</span></div>
+              <div className="flex gap-3"><Phone size={18} style={{ color: c.coffee }} className="shrink-0 mt-0.5" /><span>(02) 9344 1800</span></div>
+              <div className="flex gap-3"><Mail size={18} style={{ color: c.coffee }} className="shrink-0 mt-0.5" /><span>hello@18grams.com.au</span></div>
+              <div className="flex gap-3"><Clock size={18} style={{ color: c.coffee }} className="shrink-0 mt-0.5" /><span>Mon–Sun, 7:30am – 5:00pm</span></div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <a href="#" className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: c.cream }}><Instagram size={18} /></a>
+              <a href="#" className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: c.cream }}><Facebook size={18} /></a>
+            </div>
+            <div className="mt-8 rounded-xl overflow-hidden h-56">
+              <iframe title="map" className="w-full h-full border-0" src="https://www.openstreetmap.org/export/embed.html?bbox=151.2230%2C-33.9500%2C151.2340%2C-33.9430&layer=mapnik&marker=-33.9469%2C151.2280"></iframe>
+            </div>
+          </div>
+          <div className="rounded-2xl p-6" style={{ background: c.cream }}>
+            <h3 style={headingFont} className="text-xl font-bold mb-4">Send a message</h3>
+            <div className="grid gap-3">
+              <input placeholder="Name" className="p-3 rounded-xl text-sm outline-none" style={{ background: c.creamDeep, border: `1px solid ${c.sage}` }} />
+              <input placeholder="Email" className="p-3 rounded-xl text-sm outline-none" style={{ background: c.creamDeep, border: `1px solid ${c.sage}` }} />
+              <textarea placeholder="Message" rows={4} className="p-3 rounded-xl text-sm outline-none resize-none" style={{ background: c.creamDeep, border: `1px solid ${c.sage}` }} />
+              <button className="py-3 rounded-full font-semibold text-sm" style={{ background: c.coffee, color: "#fff" }}>Send message</button>
+            </div>
+            <div className="mt-6 pt-6 border-t" style={{ borderColor: c.creamDeep }}>
+              <h4 className="text-sm font-semibold mb-2">Newsletter</h4>
+              {newsletterDone ? (
+                <p className="text-sm" style={{ color: c.sageDeep }}>Thanks — you're on the list.</p>
+              ) : (
+                <div className="flex gap-2">
+                  <input value={newsletterEmail} onChange={(e) => setNewsletterEmail(e.target.value)} placeholder="you@email.com" className="flex-1 p-2.5 rounded-full text-sm outline-none" style={{ background: c.creamDeep, border: `1px solid ${c.sage}` }} />
+                  <button onClick={() => newsletterEmail.trim() && setNewsletterDone(true)} className="px-4 rounded-full text-xs font-semibold" style={{ background: c.sage, color: "#fff" }}>Join</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="text-center py-8 text-xs opacity-60" style={{ background: c.cream }}>
+        © {new Date().getFullYear()} 18 Grams Café. Westfield Eastgardens, Sydney.
+      </footer>
+
+      {/* Back to top */}
+      {showBackToTop && (
+        <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="fixed bottom-20 right-5 w-11 h-11 rounded-full flex items-center justify-center shadow-lg z-[60]" style={{ background: c.coffee, color: "#fff" }}>
+          <ArrowUp size={18} />
+        </button>
+      )}
+
+      {/* Cookie consent */}
+      {cookieVisible && (
+        <div className="fixed bottom-0 left-0 w-full z-[80] px-5 py-4 flex flex-col sm:flex-row items-center gap-3 justify-between" style={{ background: c.charcoal, color: c.cream }}>
+          <p className="text-xs opacity-90">We use cookies to improve your experience on this demo site.</p>
+          <button onClick={() => setCookieVisible(false)} className="px-4 py-1.5 rounded-full text-xs font-semibold shrink-0" style={{ background: c.sage, color: "#fff" }}>Accept</button>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        html { scroll-behavior: smooth; }
+        @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; } }
+      `}</style>
+    </div>
+  );
+}
+
+const root = createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
+</html>
